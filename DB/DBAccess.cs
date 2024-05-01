@@ -17,8 +17,8 @@ namespace ReadingEmailsGraphAPI.DB
 
             using (SqlConnection conn = new SqlConnection(DBConfiguration.GetConnectionString()))
             {
-                using (SqlCommand cmdInsertEmail = new SqlCommand("INSERT INTO EmailReceived (name,from_email,received_datetime,subject,message,transferred_to_hubspot) " +
-                                                                  "VALUES (@Name,@FromEmail,@ReceivedDateTime,@Subject,@Message,@TransferredToHubspot)",conn))
+                using (SqlCommand cmdInsertEmail = new SqlCommand("INSERT INTO EmailReceived (name,from_email,received_datetime,subject,message,file_name,status,transferred_to_hubspot) " +
+                                                                  "VALUES (@Name,@FromEmail,@ReceivedDateTime,@Subject,@Message,@FileName,@Status,@TransferredToHubspot)",conn))
                 {
                     conn.Open();
                     try
@@ -28,6 +28,8 @@ namespace ReadingEmailsGraphAPI.DB
                         cmdInsertEmail.Parameters.AddWithValue("@ReceivedDateTime", email.ReceivedDateTime);
                         cmdInsertEmail.Parameters.AddWithValue("@Subject", email.Subject);
                         cmdInsertEmail.Parameters.AddWithValue("@Message", email.Message);
+                        cmdInsertEmail.Parameters.AddWithValue("@FileName", email.FileName);
+                        cmdInsertEmail.Parameters.AddWithValue("@Status", email.Status);
                         cmdInsertEmail.Parameters.AddWithValue("@TransferredToHubspot", email.TransferredToHubSpot);
                         res = cmdInsertEmail.ExecuteNonQuery();
                     }

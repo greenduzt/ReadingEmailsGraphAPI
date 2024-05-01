@@ -4,6 +4,7 @@ using ReadingEmailsGraphAPI.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mail;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -48,9 +49,12 @@ namespace ReadingEmailsGraphAPI.Services
             //Process attachments only if the Attachments collection is not null
             if (message.Attachments != null)
             {
+                email.Status = "Attachment available - ";
                 // Process attachments
                 foreach (var attachment in message.Attachments)
                 {
+                    email.Status += $"{attachment.ContentType} | ";
+
                     if (attachment is FileAttachment fileAttachment && fileAttachment.ContentType == "application/pdf")
                     {
                         // Download the attachment
@@ -65,12 +69,15 @@ namespace ReadingEmailsGraphAPI.Services
                         System.IO.File.WriteAllBytes(attachmentFilePath, attachmentStream);
 
                         Console.WriteLine($"PDF attachment {attachmentFileName} downloaded to {attachmentFilePath} for email {message.Id}");
-                    }
+
+                        email.FileName = fileAttachment.Name;
+                    }                    
                 }
             }
             else
             {
                 Console.WriteLine("No attachments found for the email.");
+                email.Status += "Attachment not found";
             }
 
 

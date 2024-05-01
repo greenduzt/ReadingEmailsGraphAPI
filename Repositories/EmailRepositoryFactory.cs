@@ -2,6 +2,7 @@
 
 namespace ReadingEmailsGraphAPI.Repositories
 {
+    /** This factory creates an instance of EmailRepository object. It encapsulates the logic of creating these repository instances. **/
     public class EmailRepositoryFactory : IEmailRepositoryFactory
     {
 
