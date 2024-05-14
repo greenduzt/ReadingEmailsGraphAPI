@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
 using ReadingEmailsGraphAPI.Repositories;
 using ReadingEmailsGraphAPI.Services;
+using Serilog.Events;
+using Serilog;
 using System.Text.RegularExpressions;
 
 class Program
@@ -12,6 +14,14 @@ class Program
             .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
             .AddUserSecrets<Program>(true)
             .Build();
+
+        Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .WriteTo.File($"{config["Logging:Path"]} - {DateTime.Now.ToString("yyyyMMdd_HHmmss")}.txt",
+                    rollingInterval: RollingInterval.Day,
+                    restrictedToMinimumLevel: LogEventLevel.Debug,
+                    shared: true)
+                .CreateLogger();
 
         // Create an instance of GraphApiService
         GraphApiService graphApiService = new GraphApiService(config);
