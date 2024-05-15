@@ -28,20 +28,20 @@ class Program
         // Create an instance of GraphApiService
         GraphApiService graphApiService = new GraphApiService(config);
 
-        // Specify the email address to fetch unread messages
+        // Email address to fetch unread messages
         string userEmail = config["GraphMail:Email"];
 
         try
         {
-            // Call the GetUnreadMessagesAsync method to fetch unread messages
+            // Calling the GetUnreadMessagesAsync method to fetch unread messages
             var unreadMessages = await graphApiService.GetUnreadMessagesAsync(userEmail);
 
             if (unreadMessages.Count > 0)
             {
-                // Create an instance of EmailProcessingService
+                // Creating an instance of EmailProcessingService
                 EmailProcessingService emailProcessingService = new EmailProcessingService(config);
 
-                // Create the factory
+                // Creating the factory
                 IEmailRepositoryFactory repositoryFactory = new EmailRepositoryFactory();
 
                 // Use the factory to create the email repository

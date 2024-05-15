@@ -1,41 +1,52 @@
-# Microsoft Graph Email Reader and Attachment Downloader
+# ReadingEmailsGraphAPI
 
-This console application demonstrates how to read emails from a Microsoft Exchange server using the Microsoft Graph API, mark emails as read, and download attachments.
+ReadingEmailsGraphAPI is a .NET Core application for processing email messages retrieved from a mail server using the Microsoft Graph API.
 
-## Description
+## Services
 
-This program utilizes the Microsoft Graph SDK along with Azure Identity to authenticate and access emails from a specified user's inbox. It filters and retrieves only unread emails, displays email details such as sender name, recipient, subject, arrival time, and message content. Additionally, it downloads PDF attachments from unread emails to a specified folder.
+### 1. GraphApiService
 
-## Features
+Responsible for fetching emails from the Microsoft Graph API and marking them as read.
 
-- Authenticate with Azure Identity using client secret credentials.
-- Retrieve unread emails from a specified user's inbox using the Microsoft Graph SDK.
-- Display email details such as sender name, recipient, subject, arrival time, and message content.
-- Download PDF attachments from unread emails to a specified folder.
-- Mark emails as read after processing.
+- `GetUnreadMessagesAsync(userEmail)`: Retrieves unread email messages for a specified user.
+- `MakeEmailRead(message)`: Marks an email message as read.
 
-## Getting Started
+### 2. EmailProcessingService
 
-### Prerequisites
+Responsible for processing email messages and extracting relevant information.
+
+- `ConvertHtmlToPlainText(html)`: Converts HTML content of an email to plain text.
+- `ProcessMessage(message)`: Processes an email message, extracts sender information, subject, and message content, and handles attachments.
+
+## Repositories
+
+### 1. EmailRepository
+
+Responsible for adding processed email messages to the database.
+
+- `AddEmail(email)`: Adds an email message to the database.
+
+### 2. EmailRepositoryFactory
+
+Factory class for creating instances of `EmailRepository`.
+
+- `CreateEmailRepository(config)`: Creates an instance of `EmailRepository` with the provided configuration.
+
+## Usage
+
+1. **Configuration**: Ensure that the Azure and Microsoft Graph API credentials are configured properly in the application configuration.
+
+2. **Initialization**: Create instances of `GraphApiService`, `EmailProcessingService`, and `EmailRepositoryFactory` by passing the required configuration.
+
+3. **Fetch and Process Emails**: Use `GraphApiService` to fetch unread email messages, process them using `EmailProcessingService`, and add them to the database using `EmailRepository`.
+
+4. **Mark Emails as Read**: Use `GraphApiService` to mark email messages as read after processing.
+
+## Prerequisites
 
 - .NET Core SDK installed on your machine.
-- Azure Active Directory (Azure AD) application registered with the required permissions to access Microsoft Graph.
-- User secrets configured for the Azure AD application containing tenant ID, client ID, client secret, and user email.
+- Azure credentials (client ID, client secret, tenant ID) configured in the application.
+- Microsoft Graph API access granted for the application.
 
-### Configuration
-
-1. Clone this repository to your local machine.
-2. Open the project in your preferred IDE.
-3. Configure user secrets by running the following commands in the terminal:
-
-```bash
-dotnet user-secrets set "GraphMail:TenantId" "<YourTenantId>"
-dotnet user-secrets set "GraphMail:ClientId" "<YourClientId>"
-dotnet user-secrets set "GraphMail:ClientSecret" "<YourClientSecret>"
-dotnet user-secrets set "GraphMail:Email" "<UserEmail>"
-
-## Authors
-
-Contributors names and contact info
 
 Chamara Walaliyadde  

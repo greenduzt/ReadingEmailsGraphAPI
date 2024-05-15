@@ -15,7 +15,7 @@ namespace ReadingEmailsGraphAPI.Services
         {
             _configuration = configuration;
 
-            // Initialize GraphServiceClient with authentication
+            // Initializing GraphServiceClient with authentication
             var credentials = new ClientSecretCredential(
                 _configuration["GraphMail:TenantId"],
                 _configuration["GraphMail:ClientId"],
@@ -35,7 +35,7 @@ namespace ReadingEmailsGraphAPI.Services
                     new QueryOption("$filter", "isRead eq false")
                 };
 
-                // Get the unread emails for a specific user.
+                // Getting the unread emails for a specific user.
                 var messages = await _graphServiceClient.Users[userEmail].Messages
                     .Request(queryOptions)
                     .Expand("attachments")
@@ -45,7 +45,6 @@ namespace ReadingEmailsGraphAPI.Services
             }
             catch (Exception ex)
             {
-                // Handle exceptions appropriately
                 Log.Error($"Error occurred while fetching unread messages: {ex.Message}");
                 throw;
             }
@@ -61,7 +60,7 @@ namespace ReadingEmailsGraphAPI.Services
                     IsRead = true
                 };
 
-                // Update the message to mark it as read
+                // Updating the message to mark it as read
                 _graphServiceClient.Users[_configuration["GraphMail:Email"]].Messages[message.Id]
                     .Request()
                     .UpdateAsync(updatedMessage)
@@ -71,7 +70,6 @@ namespace ReadingEmailsGraphAPI.Services
             catch(Exception ex)
             {
                 Log.Error(ex, $"Error occurred while marking email {message.Id} as read.");
-                // You might want to throw the exception again depending on your requirements
                 throw;
             }
         }
