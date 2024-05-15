@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Graph;
 using ReadingEmailsGraphAPI.Models;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,21 +40,20 @@ namespace ReadingEmailsGraphAPI.Services
                 Message = ConvertHtmlToPlainText(message.Body.Content),
                
             };
-
-            Console.WriteLine($"Name: {email.Name}");
-            Console.WriteLine($"From {email.From}");
-            Console.WriteLine($"Arrived DateTime: {email.ReceivedDateTime}");
-            Console.WriteLine($"Subject: {email.Subject}");            
-            Console.WriteLine($"Message: {email.Message}");
-
+            Log.Information($"Name: {email.Name} | From {email.From} | Arrived DateTime: {email.ReceivedDateTime} | Subject: {email.Subject} | Message: {email.Message}");
+         
             //Process attachments only if the Attachments collection is not null
             if (message.Attachments != null)
             {
                 email.Status = "Attachment available - ";
+                Log.Information("Attachment available");
+                StringBuilder stringBuilder = new StringBuilder();
+
                 // Process attachments
                 foreach (var attachment in message.Attachments)
                 {
                     email.Status += $"{attachment.ContentType} | ";
+                    stringBuilder.Append($"{attachment.ContentType} | ");
 
                     if (attachment is FileAttachment fileAttachment && fileAttachment.ContentType == "application/pdf")
                     {
@@ -62,21 +62,31 @@ namespace ReadingEmailsGraphAPI.Services
                         var attachmentFileName = fileAttachment.Name;
 
                         // Specify the folder path to save the attachment
-                        var attachmentFolderPath = @"d:\Attachments\";
+                        var attachmentFolderPath = _configuration["Attachment:DownloadPath"];
 
-                        // naSave the attachment to the specified folder
+                        // aSave the attachment to the specified folder
                         var attachmentFilePath = Path.Combine(attachmentFolderPath, attachmentFileName);
-                        System.IO.File.WriteAllBytes(attachmentFilePath, attachmentStream);
+                        try
+                        {
+                            System.IO.File.WriteAllBytes(attachmentFilePath, attachmentStream);
 
-                        Console.WriteLine($"PDF attachment {attachmentFileName} downloaded to {attachmentFilePath} for email {message.Id}");
+                            stringBuilder.Append($"PDF attachment {attachmentFileName} downloaded to {attachmentFilePath} for email {message.Id}");
 
-                        email.FileName = fileAttachment.Name;
-                    }                    
+                            email.FileName = fileAttachment.Name;
+                        }
+                        catch(Exception ex)
+                        {
+                            Log.Error(ex, $"Error occurred while writing file: {attachmentFilePath}");
+                            throw;
+                        }
+                    }
                 }
+
+                Log.Information(stringBuilder.ToString());
             }
             else
             {
-                Console.WriteLine("No attachments found for the email.");
+                Log.Information("No attachments found for the email.");
                 email.Status += "Attachment not found";
             }
 

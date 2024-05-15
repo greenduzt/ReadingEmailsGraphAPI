@@ -1,6 +1,7 @@
 ﻿using Azure.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Graph;
+using Serilog;
 
 namespace ReadingEmailsGraphAPI.Services
 {
@@ -45,24 +46,34 @@ namespace ReadingEmailsGraphAPI.Services
             catch (Exception ex)
             {
                 // Handle exceptions appropriately
-                Console.WriteLine($"Error occurred while fetching unread messages: {ex.Message}");
+                Log.Error($"Error occurred while fetching unread messages: {ex.Message}");
                 throw;
             }
         }
 
         public void MakeEmailRead(Message message)
         {
-            //Mark the email as read
-            var updatedMessage = new Message
+            try
             {
-                IsRead = true
-            };
+                //Mark the email as read
+                var updatedMessage = new Message
+                {
+                    IsRead = true
+                };
 
-            // Update the message to mark it as read
-            _graphServiceClient.Users[_configuration["GraphMail:Email"]].Messages[message.Id]
-                .Request()
-                .UpdateAsync(updatedMessage)
-                .Wait();
+                // Update the message to mark it as read
+                _graphServiceClient.Users[_configuration["GraphMail:Email"]].Messages[message.Id]
+                    .Request()
+                    .UpdateAsync(updatedMessage)
+                    .Wait();
+                Log.Information($"Email {message.Id} marked as read successfully.");
+            }
+            catch(Exception ex)
+            {
+                Log.Error(ex, $"Error occurred while marking email {message.Id} as read.");
+                // You might want to throw the exception again depending on your requirements
+                throw;
+            }
         }
     }
 }

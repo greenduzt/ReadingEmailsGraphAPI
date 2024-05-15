@@ -23,6 +23,8 @@ class Program
                     shared: true)
                 .CreateLogger();
 
+        Log.Information("---ReadingEmails Started---");
+
         // Create an instance of GraphApiService
         GraphApiService graphApiService = new GraphApiService(config);
 
@@ -34,32 +36,42 @@ class Program
             // Call the GetUnreadMessagesAsync method to fetch unread messages
             var unreadMessages = await graphApiService.GetUnreadMessagesAsync(userEmail);
 
-            // Create an instance of EmailProcessingService
-            EmailProcessingService emailProcessingService = new EmailProcessingService(config);
-
-            // Create the factory
-            IEmailRepositoryFactory repositoryFactory = new EmailRepositoryFactory();
-
-            // Use the factory to create the email repository
-            IEmailRepository emailRepository = repositoryFactory.CreateEmailRepository(config);
-
-            // Process the unread messages and add them to the repository
-            foreach (var message in unreadMessages)
+            if (unreadMessages.Count > 0)
             {
-                // Process message using EmailProcessingService
-                var email = emailProcessingService.ProcessMessage(message);
+                // Create an instance of EmailProcessingService
+                EmailProcessingService emailProcessingService = new EmailProcessingService(config);
 
-                // Add email to repository
-                emailRepository.AddEmail(email);
+                // Create the factory
+                IEmailRepositoryFactory repositoryFactory = new EmailRepositoryFactory();
 
-                // Mark the email read
-                graphApiService.MakeEmailRead(message);
+                // Use the factory to create the email repository
+                IEmailRepository emailRepository = repositoryFactory.CreateEmailRepository(config);
+
+                // Process the unread messages and add them to the repository
+                foreach (var message in unreadMessages)
+                {
+                    // Process message using EmailProcessingService
+                    var email = emailProcessingService.ProcessMessage(message);
+
+                    // Add email to repository
+                    emailRepository.AddEmail(email);
+
+                    // Mark the email read
+                    graphApiService.MakeEmailRead(message);
+                }
+            }
+            else
+            {
+                Log.Information("No new emails found");
             }
         }
         catch (Exception ex)
         {
-            // Handle exceptions
-            Console.WriteLine($"An error occurred: {ex.Message}");
-        }       
+            Log.Error(ex, "An unhandled exception occurred");
+        }
+        finally
+        {
+            Log.Information("---ReadingEmails Ended---");
+        }
     } 
 }
