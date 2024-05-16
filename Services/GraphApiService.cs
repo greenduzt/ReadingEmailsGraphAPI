@@ -25,7 +25,7 @@ namespace ReadingEmailsGraphAPI.Services
             _graphServiceClient = new GraphServiceClient(credentials);
         }
 
-        public async Task<List<Message>> GetUnreadMessagesAsync(string userEmail)
+        public async Task<Message> GetUnreadMessagesAsync(string userEmail)
         {
             try
             {
@@ -38,10 +38,12 @@ namespace ReadingEmailsGraphAPI.Services
                 // Getting the unread emails for a specific user.
                 var messages = await _graphServiceClient.Users[userEmail].Messages
                     .Request(queryOptions)
+                    .OrderBy("receivedDateTime asc")
+                    .Top(1) // Limit to only one message
                     .Expand("attachments")
                     .GetAsync();
 
-                return messages.CurrentPage.ToList();
+                return messages.FirstOrDefault();
             }
             catch (Exception ex)
             {

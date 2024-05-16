@@ -1,14 +1,9 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using CoreLibrary;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Graph;
-using ReadingEmailsGraphAPI.Models;
 using Serilog;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Mail;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace ReadingEmailsGraphAPI.Services
 {

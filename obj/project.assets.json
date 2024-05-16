@@ -960,6 +960,16 @@
         "runtime": {
           "lib/netcoreapp2.1/_._": {}
         }
+      },
+      "CoreLibrary/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v6.0",
+        "compile": {
+          "bin/placeholder/CoreLibrary.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/CoreLibrary.dll": {}
+        }
       }
     }
   },
@@ -3199,11 +3209,17 @@
         "useSharedDesignerContext.txt",
         "version.txt"
       ]
+    },
+    "CoreLibrary/1.0.0": {
+      "type": "project",
+      "path": "../CoreLibrary/CoreLibrary.csproj",
+      "msbuildProject": "../CoreLibrary/CoreLibrary.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "net6.0": [
       "Azure.Identity >= 1.11.2",
+      "CoreLibrary >= 1.0.0",
       "Microsoft.Extensions.Configuration >= 8.0.0",
       "Microsoft.Extensions.Configuration.FileExtensions >= 8.0.0",
       "Microsoft.Extensions.Configuration.UserSecrets >= 8.0.0",
@@ -3245,7 +3261,11 @@
       "frameworks": {
         "net6.0": {
           "targetAlias": "net6.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "D:\\Projects\\CoreLibrary\\CoreLibrary.csproj": {
+              "projectPath": "D:\\Projects\\CoreLibrary\\CoreLibrary.csproj"
+            }
+          }
         }
       },
       "warningProperties": {
