@@ -1,8 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using ReadingEmailsGraphAPI.Repositories;
-using ReadingEmailsGraphAPI.Services;
-using Serilog;
-using Serilog.Events;
+﻿using ReadingEmailsGraphAPI.Services;
 
 namespace ReadingEmailsGraphAPI
 {

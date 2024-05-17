@@ -1,15 +1,10 @@
-﻿using Microsoft.Extensions.Configuration;
-using ReadingEmailsGraphAPI.Repositories;
-using Serilog.Events;
-using Serilog;
-using CoreLibrary;
-using CoreLibrary.Models;
-using IEmailRepository = ReadingEmailsGraphAPI.Repositories.IEmailRepository;
-using Microsoft.Graph;
-using Microsoft.Extensions.Hosting;
-using CoreLibrary.Data;
-using Microsoft.Extensions.DependencyInjection;
+﻿using CoreLibrary.Data;
 using CoreLibrary.Data.Repositories;
+using CoreLibrary.Models;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Serilog;
+using Serilog.Events;
 
 namespace ReadingEmailsGraphAPI.Services
 {
@@ -30,27 +25,7 @@ namespace ReadingEmailsGraphAPI.Services
                         rollingInterval: RollingInterval.Day,
                         restrictedToMinimumLevel: LogEventLevel.Debug,
                         shared: true)
-                    .CreateLogger();
-
-            var services = ConfigureServices(config); // Configure services
-            using (var serviceProvider = services.BuildServiceProvider())
-            {
-                var systemParameterRepository = serviceProvider.GetRequiredService<ISystemParameterRepository>();
-                var hubSpotProductRepository = serviceProvider.GetRequiredService<IHubSpotProductRepository>();
-
-                var parameters = await systemParameterRepository.GetAllAsync();
-                foreach (var param in parameters)
-                {
-                    Console.WriteLine($"Type: {param.Type}, AttachmentLocation: {param.AttchmentLocation}");
-                }
-
-                var products = await hubSpotProductRepository.GetAllAsync();
-                foreach (var product in products)
-                {
-                    Console.WriteLine($"Name: {product.Name}, SKU: {product.SKU}, Price: {product.Price}");
-                }
-
-            }
+                    .CreateLogger();            
 
             Log.Information("---ReadingEmails Started---");
 
@@ -69,33 +44,30 @@ namespace ReadingEmailsGraphAPI.Services
                 {
                     // Creating an instance of EmailProcessingService
                     EmailProcessingService emailProcessingService = new EmailProcessingService(config);
-
-                    // Creating the factory
-                    IEmailRepositoryFactory repositoryFactory = new EmailRepositoryFactory();
-
-                    // Use the factory to create the email repository
-                    IEmailRepository emailRepository = repositoryFactory.CreateEmailRepository(config);
-
+                    
                     // Process message using EmailProcessingService
                     Email email = emailProcessingService.ProcessMessage(unreadMessages);
 
-                    // Add email to repository
-                    emailRepository.AddEmail(email);
+                    var services = ConfigureServices(config);
+                    using (var serviceProvider = services.BuildServiceProvider())
+                    {
+                        var systemParameterRepository = serviceProvider.GetRequiredService<ISystemParameterRepository>();
+                        var emailRepository = serviceProvider.GetRequiredService<IEmailRepository>();
 
-                    // Mark the email read
-                    graphApiService.MakeEmailRead(unreadMessages);
+                        var parameters = await systemParameterRepository.GetAllAsync();
 
-                    // Allocate the attachment path to email object
-                    //var filePath = CoreLibrary.Functions.CoreFunctions.GetPOFilePath();
-                    
-                    //email.FilePath = filePath;
-                    
-                    //if(string.IsNullOrWhiteSpace(filePath))
-                    //{
-                    //    Log.Error("PO file path not found");
-                    //    // Set default file path
-                    //    //email.FilePath = "";
-                    //}
+                        // Allocate the attachment path to email object
+                        var attachmentLocation = parameters.FirstOrDefault(x => x.Type.Equals("po_location"));
+
+                        email.FilePath = attachmentLocation.AttchmentLocation;
+
+                        var result = await emailRepository.AddAsync(email);
+                        Console.WriteLine($"Email inserted, result: {result}");
+
+                        // Mark the email read
+                        graphApiService.MakeEmailRead(unreadMessages);                        
+                      
+                    }
 
                     return email;
                 }
