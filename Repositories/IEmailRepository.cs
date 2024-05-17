@@ -1,4 +1,4 @@
-﻿using CoreLibrary;
+﻿using CoreLibrary.Models;
 
 namespace ReadingEmailsGraphAPI.Repositories
 {

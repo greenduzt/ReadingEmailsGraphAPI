@@ -1,11 +1,13 @@
 ﻿using CoreLibrary;
+using CoreLibrary.Models;
+using Serilog;
 using System.Data.SqlClient;
 using System.Diagnostics;
 
 namespace ReadingEmailsGraphAPI.DB
 {
     public static class DBAccess
-    {
+    {       
         public static int AddToEmailReceived(Email email)
         {
             int res = 0;

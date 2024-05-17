@@ -3,6 +3,13 @@ using ReadingEmailsGraphAPI.Repositories;
 using Serilog.Events;
 using Serilog;
 using CoreLibrary;
+using CoreLibrary.Models;
+using IEmailRepository = ReadingEmailsGraphAPI.Repositories.IEmailRepository;
+using Microsoft.Graph;
+using Microsoft.Extensions.Hosting;
+using CoreLibrary.Data;
+using Microsoft.Extensions.DependencyInjection;
+using CoreLibrary.Data.Repositories;
 
 namespace ReadingEmailsGraphAPI.Services
 {
@@ -24,6 +31,26 @@ namespace ReadingEmailsGraphAPI.Services
                         restrictedToMinimumLevel: LogEventLevel.Debug,
                         shared: true)
                     .CreateLogger();
+
+            var services = ConfigureServices(config); // Configure services
+            using (var serviceProvider = services.BuildServiceProvider())
+            {
+                var systemParameterRepository = serviceProvider.GetRequiredService<ISystemParameterRepository>();
+                var hubSpotProductRepository = serviceProvider.GetRequiredService<IHubSpotProductRepository>();
+
+                var parameters = await systemParameterRepository.GetAllAsync();
+                foreach (var param in parameters)
+                {
+                    Console.WriteLine($"Type: {param.Type}, AttachmentLocation: {param.AttchmentLocation}");
+                }
+
+                var products = await hubSpotProductRepository.GetAllAsync();
+                foreach (var product in products)
+                {
+                    Console.WriteLine($"Name: {product.Name}, SKU: {product.SKU}, Price: {product.Price}");
+                }
+
+            }
 
             Log.Information("---ReadingEmails Started---");
 
@@ -58,6 +85,18 @@ namespace ReadingEmailsGraphAPI.Services
                     // Mark the email read
                     graphApiService.MakeEmailRead(unreadMessages);
 
+                    // Allocate the attachment path to email object
+                    //var filePath = CoreLibrary.Functions.CoreFunctions.GetPOFilePath();
+                    
+                    //email.FilePath = filePath;
+                    
+                    //if(string.IsNullOrWhiteSpace(filePath))
+                    //{
+                    //    Log.Error("PO file path not found");
+                    //    // Set default file path
+                    //    //email.FilePath = "";
+                    //}
+
                     return email;
                 }
                 else
@@ -79,5 +118,13 @@ namespace ReadingEmailsGraphAPI.Services
             // Returns null if no unread email is found or any error 
             return null;
         }
+
+        private static IServiceCollection ConfigureServices(IConfiguration config)
+        {
+            var services = new ServiceCollection();
+            services.AddDataAccessServices(config); // Pass IConfiguration
+            return services;
+        }
+
     }
 }

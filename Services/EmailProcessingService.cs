@@ -1,4 +1,5 @@
 ﻿using CoreLibrary;
+using CoreLibrary.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Graph;
 using Serilog;
